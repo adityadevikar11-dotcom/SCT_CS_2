@@ -1,173 +1,253 @@
-from PIL import Image
-import numpy as np
-import tkinter as tk
-from tkinter import filedialog
-import os
+🔐 Image Encryption Tool Using Pixel Manipulation
+📌 Project Overview
+This project is a simple Image Encryption and Decryption Tool developed using Python. The tool encrypts images by manipulating pixel values and rearranging pixel positions, making the original image unreadable without the correct key. The primary goal of this project is to demonstrate the fundamental concepts of cryptography, image processing, and data protection in a practical way.
 
+This project is intended for educational purposes and helps beginners understand how encryption works at a basic level before moving on to advanced cryptographic algorithms such as AES and RSA.
 
-def swap_pixel_channels(image_path, output_path):
-    """
-    Swaps the Red and Blue channel values of every pixel.
-    """
+🎯 Objectives
+Learn how digital images are represented as pixel data.
+Understand the basic principles of encryption and decryption.
+Explore pixel manipulation techniques.
+Gain hands-on experience with Python image processing libraries.
+Demonstrate the concept of symmetric-key encryption.
+📖 What is Image Encryption?
+Image encryption is the process of converting an image into an unreadable format so that unauthorized users cannot access its contents. The encrypted image appears as random noise or distorted data. Only users possessing the correct decryption key can restore the original image.
 
-    img = Image.open(image_path).convert("RGB")
-    pixels = np.array(img)
+Original Image
+Readable Image
+Encrypted Image
+Random Noise
+Decrypted Image
+Readable Image Restored
+Image encryption is commonly used in:
 
-    # Swap R and B channels
-    swapped = pixels[:, :, [2, 1, 0]]
+Secure image transmission
+Military communication systems
+Medical image protection
+Cloud storage security
+Digital forensics
+Confidential document sharing
+⚙️ How the Project Works
+The encryption process consists of two major steps:
 
-    result = Image.fromarray(swapped.astype("uint8"))
-    result.save(output_path)
+Step 1: Pixel Value Manipulation
+Each pixel value is modified using a secret key.
 
-    print(f"✅ Channel-swapped image saved to: {output_path}")
+Formula
+Encrypted Pixel = (Original Pixel + Key) mod 256
+Example
+Assume:
 
+Original Pixel = 100
+Key = 5
+Calculation:
 
-def apply_math_operation(image_path, output_path, key, operation="add"):
-    """
-    Applies a mathematical operation to every pixel channel.
-    Supported operations: add, subtract, multiply.
-    """
+(100 + 5) mod 256 = 105
+Result:
 
-    img = Image.open(image_path).convert("RGB")
+Encrypted Pixel = 105
+This changes the color information of every pixel in the image.
 
-    # Use int16 to avoid overflow during calculations
-    pixels = np.array(img, dtype=np.int16)
+Step 2: Pixel Position Shuffling
+After changing pixel values, the pixels are randomly rearranged.
 
-    if operation == "add":
-        result = (pixels + key) % 256
+Example:
 
-    elif operation == "subtract":
-        result = (pixels - key) % 256
+Before:
 
-    elif operation == "multiply":
-        result = (pixels * key) % 256
+A B C D
+After:
 
-    else:
-        raise ValueError(
-            "Unsupported operation. Choose add, subtract, or multiply."
-        )
+C A D B
+This destroys the visual structure of the image and makes it appear as random noise.
 
-    result_img = Image.fromarray(result.astype("uint8"))
-    result_img.save(output_path)
+The shuffle pattern is generated using:
 
-    print(f"✅ {operation.capitalize()} operation applied.")
-    print(f"   Key: {key}")
-    print(f"   Saved to: {output_path}")
+np.random.seed(key)
+The same key always produces the same shuffle pattern.
 
+🔓 Decryption Process
+The decryption process reverses the encryption steps.
 
-def select_image():
-    """
-    Opens a file browser and allows the user to select an image.
-    """
+Step 1: Reverse Pixel Shuffling
+The original pixel positions are restored.
 
-    root = tk.Tk()
-    root.withdraw()
+C A D B
+becomes
 
-    file_path = filedialog.askopenfilename(
-        title="Select an Image",
-        filetypes=[
-            ("Image Files", "*.jpg *.jpeg *.png *.bmp *.webp"),
-            ("JPG Files", "*.jpg *.jpeg"),
-            ("PNG Files", "*.png"),
-            ("All Files", "*.*")
-        ]
-    )
+A B C D
+Step 2: Reverse Pixel Manipulation
+Formula
+Original Pixel = (Encrypted Pixel - Key) mod 256
+Example:
 
-    root.destroy()
+Encrypted Pixel = 105
+Key = 5
 
-    return file_path
+(105 - 5) mod 256 = 100
+Result:
 
+Original Pixel = 100
+The original image is successfully recovered.
 
-if __name__ == "__main__":
+🔑 Why the Key is Important
+The key controls:
 
-    print("======================================")
-    print("       IMAGE ENCRYPTION TOOL")
-    print("======================================")
+Pixel value transformation
+Pixel shuffling pattern
+Without the correct key:
 
-    # Open file selection window
-    print("\n📂 Please select an image...")
+Pixel positions cannot be restored.
+Pixel values cannot be recovered.
+As a result, the image remains unreadable.
+🧠 Concepts Used
+1. Cryptography
+Cryptography is the science of protecting information by transforming it into a secure format. The project demonstrates:
 
-    INPUT_IMG = select_image()
+Encryption
+Converting readable data into unreadable data.
 
-    # Check if user selected an image
-    if not INPUT_IMG:
-        print("❌ No image selected.")
-        exit()
+Decryption
+Converting encrypted data back into readable data.
 
-    print("\n✅ Image selected:")
-    print(INPUT_IMG)
+2. Symmetric Key Encryption
+This project uses a symmetric encryption model.
 
-    # Get folder of original image
-    image_folder = os.path.dirname(INPUT_IMG)
+Definition
+The same key is used for:
 
-    # Output paths
-    OUTPUT_SWAPPED = os.path.join(
-        image_folder,
-        "output_swapped.png"
-    )
+Encryption
+Decryption
+Example:
 
-    OUTPUT_MATH = os.path.join(
-        image_folder,
-        "output_math.png"
-    )
+Encryption Key = 5
+Decryption Key = 5
+If different keys are used, the image cannot be recovered.
+3. Pixel Manipulation
+A digital image consists of pixels. Each pixel stores color information.
 
-    # ----------------------------------------
-    # RGB CHANNEL SWAP
-    # ----------------------------------------
+For RGB images:
 
-    print("\n--- RGB Channel Swap ---")
+Red   : 0–255
+Green : 0–255
+Blue  : 0–255
+Example:
 
-    swap_pixel_channels(
-        INPUT_IMG,
-        OUTPUT_SWAPPED
-    )
+(255,0,0)
+represents a red pixel. The project modifies these pixel values during encryption.
+4. Modular Arithmetic
+The project uses:
 
-    # ----------------------------------------
-    # MATHEMATICAL OPERATION
-    # ----------------------------------------
+% 256
+Why?
+Pixel values must remain between:
 
-    print("\n--- Pixel Mathematical Operation ---")
+0 and 255
+Example:
 
-    try:
-        key = int(input("Enter key value: "))
+250 + 20 = 270
+270 mod 256 = 14
+This keeps values within the valid pixel range.
 
-    except ValueError:
-        print("❌ Key must be an integer.")
-        exit()
+5. Randomization
+Randomization is used to shuffle pixel positions.
 
-    print("\nChoose operation:")
-    print("1. Add")
-    print("2. Subtract")
-    print("3. Multiply")
+np.random.shuffle()
+The random pattern depends on the encryption key. This adds an additional layer of security.
+6. NumPy Arrays
+Images are converted into NumPy arrays for efficient processing.
 
-    choice = input("\nEnter your choice (1/2/3): ").strip()
+Example:
 
-    if choice == "1":
-        operation = "add"
+img_array = np.array(img)
+Advantages:
 
-    elif choice == "2":
-        operation = "subtract"
+Faster computation
+Easy pixel manipulation
+Efficient memory usage
+7. Image Processing
+The project uses the Pillow library.
 
-    elif choice == "3":
-        operation = "multiply"
+Features Used
+Loading images
+Converting images to arrays
+Saving encrypted images
+Saving decrypted images
+📚 Python Libraries Used
+Pillow (PIL)
+Used for image processing.
 
-    else:
-        print("❌ Invalid choice.")
-        exit()
+Installation:
 
-    apply_math_operation(
-        INPUT_IMG,
-        OUTPUT_MATH,
-        key,
-        operation
-    )
+pip install pillow
+Functions used:
 
-    print("\n======================================")
-    print("          PROCESS COMPLETED")
-    print("======================================")
+Image.open()
+Image.fromarray()
+NumPy
+Used for numerical operations and pixel manipulation.
 
-    print("\n📁 Output files:")
-    print(OUTPUT_SWAPPED)
-    print(OUTPUT_MATH)
+Installation:
 
-    input("\nPress Enter to exit...")
+pip install numpy
+Functions used:
+
+np.array()
+np.random.shuffle()
+np.arange()
+np.mod()
+🛠️ Project Structure
+Image Encryption Tool
+│
+├── Image.py
+├── Original Image
+├── Encrypted Image
+├── Decrypted Image
+└── README.md
+🚀 How to Run the Project
+Install Dependencies
+pip install pillow numpy
+Run the Program
+python Image.py
+Encrypt an Image
+1. Encrypt Image
+Enter image path
+Enter output file name
+Enter encryption key
+Decrypt an Image
+2. Decrypt Image
+Enter encrypted image path
+Enter output file name
+Enter decryption key
+🔒 Security Analysis
+Advantages
+✔ Demonstrates encryption concepts ✔ Uses both confusion and diffusion ✔ Simple and easy to understand ✔ Good educational cybersecurity project
+Limitations
+❌ Small key space ❌ Not resistant to brute-force attacks ❌ Not suitable for real-world security ❌ Uses predictable pseudo-random generation ❌ Does not provide cryptographic-level protection
+🔮 Future Improvements
+Possible enhancements include:
+
+Password-based encryption
+AES image encryption
+GUI using Tkinter
+Drag-and-drop image support
+Random key generation
+Key file storage
+Support for multiple encryption rounds
+Histogram analysis
+Image integrity verification
+Secure cryptographic random number generation
+🎓 Learning Outcomes
+Through this project, I gained practical experience in:
+
+Python Programming
+Image Processing
+NumPy Arrays
+Pillow Library
+Cryptography Fundamentals
+Symmetric Encryption
+Pixel Manipulation Techniques
+Randomization Methods
+Encryption and Decryption Workflows
+Cybersecurity Concepts
+"Understanding how encryption works at a fundamental level is the first step toward building secure systems." 🔐
